@@ -1,11 +1,13 @@
 'use strict';
 
-const { driverHandler, driverDelivered } = require('./index')
+const { newOrder, deliveredThanks } = require('./index')
 const Chance = require('chance');
 const chance = new Chance();
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const Client = require("socket.io-client");
+
+
 
 console.log = jest.fn();
 
@@ -40,13 +42,13 @@ afterAll(() => {
   clientSocket.close();
 });
 
-describe('Driver Handler', () => {
-  test('Driver picks up order', () => {
-    driverHandler(event);
-    expect(console.log).toHaveBeenCalledWith(`DRIVER: picked up ${event.payload.orderID}`);
+describe('VendorHandler', () => {
+  test('Should create new order', () => {
+    newOrder(event);
+    expect(console.log).toHaveBeenCalled();
   });
-  test('Driver delivers order', () => {
-    driverDelivered(event);
-    expect(console.log).toHaveBeenCalledWith(`DRIVER: delivered ${event.payload.orderID}`);
+  test('Thanks Driver', async () => {
+    deliveredThanks(event);
+    expect(console.log).toHaveBeenCalledWith('Thank you for delivering', event.payload.orderID);
   });
 }); 
