@@ -2,16 +2,19 @@
 
 const { io } = require('socket.io-client');
 const socket = io('http://localhost:3001/caps');
-// socket.emit('JOIN', 'hub')
+
+socket.emit('JOIN', '1-206-flowers')
+socket.emit('GET_DELIVERIES',{ queueId: '1-206-flowers'})
 
 const Chance = require('chance');
 const chance = new Chance();
 
 function newOrder(){
-  console.log('-------new order begins---------');
   const event = {
     event: 'PICKUP',
     time: new Date(Date.now()),
+    queueId: '1-206-flowers',
+    packageId: chance.guid(),
     payload: {
       store: '1-206-flowers',
       orderID: chance.guid(),
@@ -19,21 +22,24 @@ function newOrder(){
       address: chance.address(),
     },
   };
-  console.log(event);
+  console.log('New Order :', event.packageId);
   socket.emit('ORDERIN', event);
 }
 
-function deliveredThanks(payload){
-  console.log('Thank you for delivering', payload.payload.orderID);
-  process.exit();
+
+function recievedThanks(payload){
+  payload.event = 'Recieved'
+  payload.time = new Date()
+  console.log(`Recieved confirmation for ${payload.packageId}`)
+  socket.emit('COMPLETE', payload)
 }
 
+socket.on('RECIEVED', recievedThanks)
 
 setInterval(() => {
   newOrder();
-}, 10000);
+}, 8000);
 
 
-socket.on('DELIVERED', deliveredThanks )
 
-module.exports = { newOrder, deliveredThanks }
+module.exports = { newOrder }
