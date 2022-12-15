@@ -2,29 +2,24 @@
 
 const { io } = require('socket.io-client');
 const socket = io('http://localhost:3001/caps');
-// socket.emit('JOIN', 'hub')
+
+socket.emit('GET_PICKUP', 'pickUpQueue')
 
 function driverHandler (payload){
   setTimeout(() => {
     console.log(`DRIVER: picked up ${payload.payload.orderID}`)
-    let event = {
-      event: 'In-Transit',
-      time: new Date(),
-      payload: payload.payload,
-    };
-    socket.emit('IN-TRANSIT', event)
+      payload.event = 'In-Transit'
+      payload.time = new Date()
+    socket.emit('IN-TRANSIT', payload)
   }, 3000)
 };
 
 function driverDelivered(payload){
   setTimeout(() => {
-    let event = {
-      event: 'Delivered',
-      time: new Date(),
-      payload: payload.payload,
-    };
-    console.log(`DRIVER: delivered ${event.payload.orderID}`)
-    socket.emit('DELIVERED', event)
+    payload.event = 'Delivered'
+    payload.time = new Date()
+    console.log(`DRIVER: delivered ${payload.payload.orderID}`)
+    socket.emit('DELIVERED', payload)
   }, 3000)
 };
 
